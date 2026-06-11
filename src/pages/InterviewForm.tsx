@@ -445,11 +445,14 @@ export default function InterviewForm() {
             <div className="space-y-1.5">
               <Label>面试时长(分钟)</Label>
               <Input
-                type="number"
-                value={form.duration}
-                onChange={(e) => updateForm('duration', Number(e.target.value))}
+                type="text"
+                inputMode="numeric"
+                value={form.duration === 0 ? '' : String(form.duration)}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, '');
+                  updateForm('duration', val === '' ? 0 : Number(val));
+                }}
                 placeholder="请输入面试时长"
-                min={0}
               />
             </div>
 

@@ -55,11 +55,12 @@ export function Modal({
         className={cn(
           'relative w-full sm:max-w-md bg-white sm:rounded-2xl rounded-t-3xl shadow-card-lg animate-slide-up sm:animate-fade-in',
           'max-h-[90vh] flex flex-col',
+          'sm:mb-safe-bottom mb-0',
           className
         )}
       >
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100 flex-shrink-0">
             <h2 className="text-lg font-semibold text-neutral-700">{title}</h2>
             <button
               type="button"
@@ -76,7 +77,7 @@ export function Modal({
         </div>
 
         {footer && (
-          <div className="px-6 py-4 border-t border-neutral-100">
+          <div className="px-6 py-4 border-t border-neutral-100 flex-shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
             {footer}
           </div>
         )}

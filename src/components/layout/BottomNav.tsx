@@ -26,7 +26,7 @@ export default function BottomNav() {
               end={path === '/'}
               className={({ isActive }) =>
                 cn(
-                  'flex flex-col items-center justify-center gap-1 px-4 py-2',
+                  'flex flex-row items-center justify-center gap-2 px-3 py-2',
                   'transition-all duration-200',
                   isActive
                     ? 'text-primary-500'
@@ -38,14 +38,14 @@ export default function BottomNav() {
                 <>
                   <Icon
                     className={cn(
-                      'h-6 w-6 transition-all duration-200',
+                      'h-5 w-5 transition-all duration-200',
                       isActive && 'scale-110'
                     )}
                     strokeWidth={isActive ? 2.5 : 2}
                   />
                   <span
                     className={cn(
-                      'text-xs font-medium transition-all duration-200',
+                      'text-sm font-medium transition-all duration-200',
                       isActive && 'font-semibold'
                     )}
                   >

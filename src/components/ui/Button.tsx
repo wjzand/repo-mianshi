@@ -56,7 +56,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           variantClasses[variant],
           sizeClasses[size],
           fullWidth && 'w-full',
-          loading && 'flex items-center justify-center gap-2',
+          'inline-flex items-center justify-center gap-2',
           className
         )}
         {...props}
