@@ -58,7 +58,7 @@ export default function Home() {
   const setFilters = useInterviewStore((s) => s.setFilters);
   const interviews = useInterviewStore((s) => s.interviews);
   const { profile, loadProfile } = useProfileStore();
-  const { reports, loadReports } = useSimulationStore();
+  const { reports, loadReports, syncFromInterviews } = useSimulationStore();
 
   const [showFilter, setShowFilter] = useState(false);
 
@@ -67,6 +67,12 @@ export default function Home() {
     loadProfile();
     loadReports();
   }, [loadInterviews, loadProfile, loadReports]);
+
+  useEffect(() => {
+    if (interviews.length > 0) {
+      syncFromInterviews(interviews);
+    }
+  }, [interviews, syncFromInterviews]);
   const [uiFilters, setUiFilters] = useState<UIFilters>({
     result: 'all',
     time: 'all',

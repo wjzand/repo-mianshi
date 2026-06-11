@@ -15,6 +15,9 @@ import {
   Clock,
   CheckCircle,
   FileText,
+  AlertTriangle,
+  History,
+  Rocket,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import PageHeader from '@/components/layout/PageHeader';
@@ -229,6 +232,24 @@ export default function Profile() {
       label: '成长日记',
       icon: BookOpen,
       onClick: () => navigate('/diary'),
+    },
+    {
+      label: '模拟舱',
+      icon: Rocket,
+      onClick: () => navigate('/simulation/setup'),
+      hint: '事前演练',
+    },
+    {
+      label: '翻车题库',
+      icon: AlertTriangle,
+      onClick: () => navigate('/simulation/fail-questions'),
+      hint: '错题攻克',
+    },
+    {
+      label: '模拟历史',
+      icon: History,
+      onClick: () => navigate('/simulation/history'),
+      hint: '进步追踪',
     },
     {
       label: '数据导出',

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Rocket, BookOpen, Clock, Zap, Target, Shield, ChevronRight } from 'lucide-react';
+import { Rocket, BookOpen, Clock, Zap, Target, Shield, ChevronRight, AlertTriangle, History } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -321,6 +321,43 @@ export default function SimulationSetup() {
                 );
               })}
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-0">
+            <button
+              type="button"
+              onClick={() => navigate('/simulation/fail-questions')}
+              className="w-full flex items-center justify-between px-5 py-4 transition-colors hover:bg-neutral-50 active:bg-neutral-100 border-b border-neutral-50"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-accent-50">
+                  <AlertTriangle className="w-5 h-5 text-accent-500" />
+                </div>
+                <div className="text-left">
+                  <span className="text-sm font-medium text-neutral-700">翻车题库</span>
+                  <p className="text-xs text-neutral-400 mt-0.5">错题攻克，专项突破</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-neutral-300" />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/simulation/history')}
+              className="w-full flex items-center justify-between px-5 py-4 transition-colors hover:bg-neutral-50 active:bg-neutral-100"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary-50">
+                  <History className="w-5 h-5 text-primary-500" />
+                </div>
+                <div className="text-left">
+                  <span className="text-sm font-medium text-neutral-700">模拟历史</span>
+                  <p className="text-xs text-neutral-400 mt-0.5">查看进步轨迹</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-neutral-300" />
+            </button>
           </CardContent>
         </Card>
       </div>

@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mic, Square, Type, ChevronRight, Clock, Award, MessageCircle, Send } from 'lucide-react';
+import { Mic, Square, Type, ChevronRight, Clock, Award, MessageCircle, Send, X } from 'lucide-react';
 import { useSimulationStore } from '@/store/simulationStore';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { TextArea } from '@/components/ui/Input';
 import { Rating } from '@/components/ui/Rating';
+import { Modal } from '@/components/ui/Modal';
 import { cn } from '@/lib/utils';
 import { DIMENSION_LABELS } from '@/types/simulation';
 
@@ -34,6 +35,7 @@ export default function SimulationRoom() {
   const [timeLeft, setTimeLeft] = useState(EXAM_TIME_PER_QUESTION);
   const [autoAdvanceCountdown, setAutoAdvanceCountdown] = useState<number | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -142,6 +144,15 @@ export default function SimulationRoom() {
     }
   }, [session, navigate]);
 
+  const handleExit = useCallback(() => {
+    setShowExitModal(true);
+  }, []);
+
+  const handleConfirmExit = useCallback(() => {
+    resetSession();
+    navigate('/simulation/setup');
+  }, [resetSession, navigate]);
+
   const handleMicDown = useCallback(() => {
     if (!speechSupported) return;
     setIsRecording(true);
@@ -191,6 +202,13 @@ export default function SimulationRoom() {
     <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-b from-primary-900 via-primary-800 to-primary-700 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 safe-top">
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleExit}
+            className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/80 hover:bg-white/20 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
           <span className="text-white/80 text-sm font-medium">
             {currentIndex + 1} / {totalQuestions}
           </span>
@@ -454,6 +472,31 @@ export default function SimulationRoom() {
           </div>
         )}
       </div>
+
+      <Modal
+        open={showExitModal}
+        onClose={() => setShowExitModal(false)}
+        title="退出模拟"
+        footer={
+          <div className="flex gap-3">
+            <Button variant="secondary" onClick={() => setShowExitModal(false)} className="flex-1">
+              继续模拟
+            </Button>
+            <Button onClick={handleConfirmExit} className="flex-1" style={{ background: 'linear-gradient(135deg, #F53F3F 0%, #FF7875 100%)' }}>
+              确认退出
+            </Button>
+          </div>
+        }
+      >
+        <div className="py-4">
+          <p className="text-neutral-600 leading-relaxed">
+            确定要退出模拟面试吗？
+          </p>
+          <p className="text-sm text-neutral-400 mt-2">
+            当前进度不会被保存，退出后需要重新开始。
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 }
