@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Pencil, Trash2, Share2, CheckCircle2, AlertCircle, Lightbulb, ArrowLeft, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, Share2, CheckCircle2, AlertCircle, Lightbulb, ArrowLeft, Loader2, Rocket } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -330,6 +330,14 @@ export default function InterviewDetail() {
       <div className="fixed bottom-0 left-0 right-0 px-4 py-3 bg-white border-t border-neutral-200 safe-bottom">
         <div className="flex items-center gap-2">
           <Button
+            variant="primary"
+            onClick={() => navigate('/simulation/setup')}
+            className="flex-1 inline-flex items-center justify-center gap-2"
+          >
+            <Rocket className="w-4 h-4" />
+            <span>模拟训练</span>
+          </Button>
+          <Button
             variant="secondary"
             onClick={handleEdit}
             className="flex-1 inline-flex items-center justify-center gap-2"
@@ -340,18 +348,16 @@ export default function InterviewDetail() {
           <Button
             variant="secondary"
             onClick={() => setDeleteModalOpen(true)}
-            className="flex-1 inline-flex items-center justify-center gap-2 text-red-600 hover:text-red-700"
+            className="inline-flex items-center justify-center gap-2 text-red-600 hover:text-red-700"
           >
             <Trash2 className="w-4 h-4" />
-            <span>删除</span>
           </Button>
           <Button
             variant="secondary"
             onClick={handleShare}
-            className="flex-1 inline-flex items-center justify-center gap-2"
+            className="inline-flex items-center justify-center gap-2"
           >
             <Share2 className="w-4 h-4" />
-            <span>分享</span>
           </Button>
         </div>
       </div>

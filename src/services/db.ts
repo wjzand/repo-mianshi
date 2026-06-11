@@ -1,8 +1,9 @@
-import { openDB as idbOpenDB, IDBPDatabase, DBSchema, IDBPObjectStore } from 'idb';
+import { openDB as idbOpenDB, IDBPDatabase, DBSchema } from 'idb';
 import { Interview } from '../types/interview';
 import { Question } from '../types/question';
 import { UserProfile } from '../types/profile';
 import { DiaryEntry } from '../types/diary';
+import { SimulationReport, FailQuestion } from '../types/simulation';
 
 interface InterviewAssistantDBSchema extends DBSchema {
   interviews: {
@@ -37,12 +38,27 @@ interface InterviewAssistantDBSchema extends DBSchema {
     key: string;
     value: UserProfile;
   };
+  simulations: {
+    key: string;
+    value: SimulationReport;
+    indexes: {
+      createdAt: string;
+    };
+  };
+  failQuestions: {
+    key: string;
+    value: FailQuestion;
+    indexes: {
+      dimension: string;
+      source: string;
+    };
+  };
 }
 
 export type InterviewAssistantDB = IDBPDatabase<InterviewAssistantDBSchema>;
 
 const DB_NAME = 'InterviewAssistantDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbInstance: InterviewAssistantDB | null = null;
 
@@ -52,39 +68,42 @@ export async function openDB(): Promise<InterviewAssistantDB> {
   }
 
   const db = await idbOpenDB<InterviewAssistantDBSchema>(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains('interviews')) {
-        const interviewsStore = db.createObjectStore('interviews', {
-          keyPath: 'id',
-        });
-        interviewsStore.createIndex('company', 'company', { unique: false });
-        interviewsStore.createIndex('position', 'position', { unique: false });
-        interviewsStore.createIndex('result', 'result', { unique: false });
-        interviewsStore.createIndex('interviewDate', 'interviewDate', { unique: false });
-        interviewsStore.createIndex('createdAt', 'createdAt', { unique: false });
+    upgrade(db, oldVersion) {
+      if (oldVersion < 1) {
+        if (!db.objectStoreNames.contains('interviews')) {
+          const interviewsStore = db.createObjectStore('interviews', { keyPath: 'id' });
+          interviewsStore.createIndex('company', 'company', { unique: false });
+          interviewsStore.createIndex('position', 'position', { unique: false });
+          interviewsStore.createIndex('result', 'result', { unique: false });
+          interviewsStore.createIndex('interviewDate', 'interviewDate', { unique: false });
+          interviewsStore.createIndex('createdAt', 'createdAt', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('questions')) {
+          const questionsStore = db.createObjectStore('questions', { keyPath: 'id' });
+          questionsStore.createIndex('category', 'category', { unique: false });
+          questionsStore.createIndex('positionType', 'positionType', { unique: false });
+          questionsStore.createIndex('isCustom', 'isCustom', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('diary')) {
+          const diaryStore = db.createObjectStore('diary', { keyPath: 'id' });
+          diaryStore.createIndex('date', 'date', { unique: false });
+          diaryStore.createIndex('type', 'type', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('profile')) {
+          db.createObjectStore('profile', { keyPath: 'id' });
+        }
       }
 
-      if (!db.objectStoreNames.contains('questions')) {
-        const questionsStore = db.createObjectStore('questions', {
-          keyPath: 'id',
-        });
-        questionsStore.createIndex('category', 'category', { unique: false });
-        questionsStore.createIndex('positionType', 'positionType', { unique: false });
-        questionsStore.createIndex('isCustom', 'isCustom', { unique: false });
-      }
-
-      if (!db.objectStoreNames.contains('diary')) {
-        const diaryStore = db.createObjectStore('diary', {
-          keyPath: 'id',
-        });
-        diaryStore.createIndex('date', 'date', { unique: false });
-        diaryStore.createIndex('type', 'type', { unique: false });
-      }
-
-      if (!db.objectStoreNames.contains('profile')) {
-        db.createObjectStore('profile', {
-          keyPath: 'id',
-        });
+      if (oldVersion < 2) {
+        if (!db.objectStoreNames.contains('simulations')) {
+          const simStore = db.createObjectStore('simulations', { keyPath: 'id' });
+          simStore.createIndex('createdAt', 'createdAt', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('failQuestions')) {
+          const fqStore = db.createObjectStore('failQuestions', { keyPath: 'id' });
+          fqStore.createIndex('dimension', 'dimension', { unique: false });
+          fqStore.createIndex('source', 'source', { unique: false });
+        }
       }
     },
   });
@@ -95,7 +114,19 @@ export async function openDB(): Promise<InterviewAssistantDB> {
 
 type StoreMethod = 'getAll' | 'get' | 'add' | 'put' | 'delete' | 'clear';
 
-function createStoreWrapper<T extends Interview | Question | UserProfile | DiaryEntry>(storeName: 'interviews' | 'questions' | 'diary' | 'profile') {
+type StoreName = 'interviews' | 'questions' | 'diary' | 'profile' | 'simulations' | 'failQuestions';
+
+type StoreValue<S extends StoreName> = 
+  S extends 'interviews' ? Interview :
+  S extends 'questions' ? Question :
+  S extends 'diary' ? DiaryEntry :
+  S extends 'profile' ? UserProfile :
+  S extends 'simulations' ? SimulationReport :
+  S extends 'failQuestions' ? FailQuestion :
+  never;
+
+function createStoreWrapper<S extends StoreName>(storeName: S) {
+  type T = StoreValue<S>;
   const execute = async <R>(method: StoreMethod, ...args: any[]): Promise<R> => {
     const db = await openDB();
     const tx = db.transaction(storeName, 'readwrite');
@@ -105,7 +136,7 @@ function createStoreWrapper<T extends Interview | Question | UserProfile | Diary
     return result as R;
   };
 
-  const bulkAdd = async (values: T[]): Promise<void> => {
+  const bulkAdd = async (values: any[]): Promise<void> => {
     const db = await openDB();
     const tx = db.transaction(storeName, 'readwrite');
     await Promise.all(values.map((v) => tx.store.add(v)));
@@ -123,7 +154,9 @@ function createStoreWrapper<T extends Interview | Question | UserProfile | Diary
   };
 }
 
-export const interviewDB = createStoreWrapper<Interview>('interviews');
-export const questionDB = createStoreWrapper<Question>('questions');
-export const diaryDB = createStoreWrapper<DiaryEntry>('diary');
-export const profileDB = createStoreWrapper<UserProfile>('profile');
+export const interviewDB = createStoreWrapper('interviews');
+export const questionDB = createStoreWrapper('questions');
+export const diaryDB = createStoreWrapper('diary');
+export const profileDB = createStoreWrapper('profile');
+export const simulationDB = createStoreWrapper('simulations');
+export const failQuestionDB = createStoreWrapper('failQuestions');

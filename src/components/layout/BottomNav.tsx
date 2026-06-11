@@ -1,11 +1,11 @@
 import { NavLink } from 'react-router-dom'
-import { ClipboardList, TrendingUp, BookOpen, User } from 'lucide-react'
+import { ClipboardList, TrendingUp, Rocket, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { path: '/', label: '面试记录', Icon: ClipboardList },
   { path: '/dashboard', label: '成长', Icon: TrendingUp },
-  { path: '/questions', label: '题库', Icon: BookOpen },
+  { path: '/simulation/setup', label: '模拟舱', Icon: Rocket },
   { path: '/profile', label: '我的', Icon: User },
 ]
 

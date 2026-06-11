@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, FileText, Sparkles } from 'lucide-react';
+import { Search, Plus, FileText, Sparkles, Rocket } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,7 @@ import InterviewCard from '@/components/interview/InterviewCard';
 import { Button } from '@/components/ui/Button';
 import { useInterviewStore } from '@/store/interviewStore';
 import { useProfileStore } from '@/store/profileStore';
+import { useSimulationStore } from '@/store/simulationStore';
 import { calculateStats } from '@/utils/analysis';
 import type { InterviewResult } from '@/types/interview';
 
@@ -57,8 +58,15 @@ export default function Home() {
   const setFilters = useInterviewStore((s) => s.setFilters);
   const interviews = useInterviewStore((s) => s.interviews);
   const { profile, loadProfile } = useProfileStore();
+  const { reports, loadReports } = useSimulationStore();
 
   const [showFilter, setShowFilter] = useState(false);
+
+  useEffect(() => {
+    loadInterviews();
+    loadProfile();
+    loadReports();
+  }, [loadInterviews, loadProfile, loadReports]);
   const [uiFilters, setUiFilters] = useState<UIFilters>({
     result: 'all',
     time: 'all',
@@ -144,6 +152,35 @@ export default function Home() {
 
         <div className="animate-fade-in animate-slide-up animate-stagger-2">
           <StatsOverview stats={stats} />
+        </div>
+
+        <div
+          className="animate-fade-in animate-slide-up animate-stagger-3 cursor-pointer"
+          onClick={() => navigate('/simulation/setup')}
+        >
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-500 via-primary-600 to-blue-600 p-5 text-white shadow-glow">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8" />
+            <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-6 -translate-x-6" />
+            <div className="relative flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Rocket className="w-5 h-5" />
+                  <h3 className="text-lg font-bold">面试模拟舱</h3>
+                </div>
+                <p className="text-sm text-white/80 mb-3">
+                  {reports.length > 0
+                    ? `上次得分 ${reports[0].totalScore}分，继续加油！`
+                    : '事前演练，告别面试现场才是第一次开口'}
+                </p>
+                <span className="inline-flex items-center gap-1 text-xs font-medium bg-white/20 rounded-full px-3 py-1">
+                  开始模拟 →
+                </span>
+              </div>
+              <div className="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0">
+                <Rocket className="w-8 h-8 text-white" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {showFilter && (

@@ -22,6 +22,11 @@ ChartJS.register(
   Legend
 )
 
+type SimulationRadarData = {
+  labels: string[]
+  values: number[]
+}
+
 const LABELS = ['技术能力', '沟通表达', '逻辑思维', '项目经验', '抗压能力', '岗位匹配']
 
 const ABILITY_KEYS: Array<keyof AbilityScores> = [
@@ -33,9 +38,13 @@ const ABILITY_KEYS: Array<keyof AbilityScores> = [
   'match',
 ]
 
+function isAbilityScores(data: AbilityScores | SimulationRadarData): data is AbilityScores {
+  return typeof data === 'object' && 'technical' in data
+}
+
 interface RadarChartProps {
-  data: AbilityScores
-  comparisonData?: AbilityScores
+  data: AbilityScores | SimulationRadarData
+  comparisonData?: AbilityScores | SimulationRadarData
   height?: number
 }
 
@@ -45,7 +54,10 @@ export default function RadarChart({
   height = 320,
 }: RadarChartProps) {
   const chartData = useMemo(() => {
-    const mainData = ABILITY_KEYS.map((key) => data[key] ?? 0)
+    const labels = isAbilityScores(data) ? LABELS : data.labels
+    const mainData = isAbilityScores(data)
+      ? ABILITY_KEYS.map((key) => data[key] ?? 0)
+      : data.values
     const datasets: ChartDataset<'radar'>[] = [
       {
         label: '当前能力',
@@ -63,7 +75,9 @@ export default function RadarChart({
     ]
 
     if (comparisonData) {
-      const compData = ABILITY_KEYS.map((key) => comparisonData[key] ?? 0)
+      const compData = isAbilityScores(comparisonData)
+        ? ABILITY_KEYS.map((key) => comparisonData[key] ?? 0)
+        : comparisonData.values
       datasets.push({
         label: '对比数据',
         data: compData,
@@ -80,7 +94,7 @@ export default function RadarChart({
       })
     }
 
-    return { labels: LABELS, datasets }
+    return { labels, datasets }
   }, [data, comparisonData])
 
   const options = useMemo<ChartOptions<'radar'>>(

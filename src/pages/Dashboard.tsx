@@ -12,6 +12,7 @@ import {
   Smile,
   Sparkles,
   Plus,
+  Rocket,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import PageHeader from '@/components/layout/PageHeader';
@@ -311,6 +312,14 @@ export default function Dashboard() {
               comparisonData={abilityTrend.early}
               height={300}
             />
+            <button
+              type="button"
+              onClick={() => navigate('/simulation/setup')}
+              className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-primary-500 to-blue-600 text-white font-medium text-sm transition-all duration-200 hover:shadow-lg active:scale-[0.98]"
+            >
+              <Rocket className="w-4 h-4" />
+              模拟提升
+            </button>
           </CardContent>
         </Card>
 
